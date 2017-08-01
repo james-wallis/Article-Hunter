@@ -1,0 +1,24 @@
+{
+  "name": "article-hunter",
+  "version": "1.0.0",
+  "description": "RSS Feed Trawler Dashboard",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "hunter": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jamesemwallis/Article-Hunter.git"
+  },
+  "author": "James Wallis",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jamesemwallis/Article-Hunter/issues"
+  },
+  "homepage": "https://github.com/jamesemwallis/Article-Hunter#readme",
+  "dependencies": {
+    "express": "^4.15.3",
+    "mysql": "^2.14.0"
+  }
+}
