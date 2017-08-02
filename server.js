@@ -24,6 +24,8 @@ var testFeedList = [
 var userFeed;
 //Initialise userFeedList for use of automated and multiple feed search
 var userFeedList = [];
+//Initialise userKeywordList for use for multiple keyword searches
+var userKeywordList = [];
 
 
 // Constant page directory
@@ -62,11 +64,13 @@ console.log("Available on port 8000\n");
 //Server functions
 app.get('/api/search', sendFeed);
 app.post('/api/search', postFeed);
+app.post('/api/addFeed', addFeed);
+app.post('/api/addKeyword', addKeyword);
 
 
 //Send Feed will parse the given RSS feed and return it as JSON
 function sendFeed(req, res) {
-  feed(userFeed, function(err, articles) {
+  feed(userFeedList, function(err, articles) {
     // if (err) return error(res, 'failed to fetch feeds', err);
     if (err) {
       //Send error 404 as there is no content
@@ -79,8 +83,6 @@ function sendFeed(req, res) {
 //Post Feed will get a new feed from a form
 function postFeed(req, res) {
   userFeed = req.body.searchurl;
-  console.log(req.body.searchurl);
-  console.log(userFeed);
   if (req.accepts('html')) {
     // browser should go to the listing of units
     res.redirect(303, '/#');
@@ -93,6 +95,39 @@ function postFeed(req, res) {
   // userFeed.push(req.body.searchurl);
 }
 
+//Add Feed will add a feed to userFeedList in order to perform searches
+function addFeed(req, res) {
+  var inList = false;
+  for (var i = 0; i < userFeedList.length; i++) {
+    if (userFeedList[i] == req.body.newfeed) {
+      inList = true;
+    }
+  }
+  if (!inList) {
+    userFeedList.push(req.body.newfeed);
+  }
+  if (req.accepts('html')) {
+    // browser should go to the listing of units
+    res.redirect(303, '/#');
+  } else {
+    res.header("Access-Control-Allow-Origin", "*").sendStatus(200);
+    // XML HTTP request that accepts JSON will instead get that
+    res.json({searchurl: req.body.newfeed});
+  }
+}
+
+//Add Keyword will add a keyword to userKeywordList in order to perform searches
+function addKeyword(req, res) {
+  userKeywordList.push(req.body.newKeyword);
+  if (req.accepts('html')) {
+    // browser should go to the listing of units
+    res.redirect(303, '/#');
+  } else {
+    res.header("Access-Control-Allow-Origin", "*").sendStatus(200);
+    // XML HTTP request that accepts JSON will instead get that
+    res.json({searchurl: req.body.newKeyword});
+  }
+}
 
 
 

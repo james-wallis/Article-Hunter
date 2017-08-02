@@ -25,25 +25,40 @@
       </div>
       <div id="result-container-outer" class="col-12">
         <div id="result-container-inner" class="">
-          <div class="col-3">
+          <div id="search-container" class="col-4">
             <h3>Search</h3>
-            <form id="quick-search" action="/api/search" method="post">
-              <div class="">
-                <label for="feed">Search Feed</label>
-                <input type="text" name="feed" id="feed-url-input" value="" placeholder="Enter Feed">
+            <form id="add-feed" action="/api/addFeed" method="post">
+              <div class="add-form">
+                <label for="feed">Add Feed</label>
+                <input type="text" name="feed" id="feed-url-input" value="https://stackoverflow.com/feeds/tag?tagnames=java&sort=newest" placeholder="Enter Feed">
               </div>
-              <!-- <div class="">
-                <label for=""></label>
-                <input type="text" name="" id="" value="" placeholder="">
-              </div>
-              <div class="">
-                <label for=""></label>
-                <input type="text" name="" id="" value="" placeholder="">
-              </div> -->
-              <input type="submit" name="submit" value="Search">
+              <input type="submit" name="submit" value="Add Feed">
             </form>
+            <form id="add-keyterm" action="/api/addKeyword" method="post">
+              <div class="add-form">
+                <label for="keyterm">Add Keyword</label>
+                <input type="text" name="keyterm" id="keyterm-input" value="" placeholder="Enter Keyterm">
+              </div>
+              <input type="submit" name="submit" value="Add Keyterm">
+            </form>
+            <div class="col-6 word-box">
+              <p>Feeds</p>
+              <ul id="feed-list">
+                <!-- Feeds to search through go here -->
+              </ul>
+            </div>
+            <div class="col-6 word-box">
+              <p>Keywords</p>
+              <ul id="keyword-list">
+                <!-- Keywords to search go here -->
+              </ul>
+            </div>
+            <div class="col-12">
+              <!-- <input id="start-search" type="submit" name="submit" value="Search"> -->
+              <button id="start-search" type="button" name="search">Search</button>
+            </div>
           </div>
-          <div class="col-9">
+          <div class="col-8">
             <h3>Results</h3>
             <div id="search-results" class="">
 

@@ -154,6 +154,10 @@ main h2 {
 
 /* AUTOMATED SEARCH RESULTS PAGE SPECIFIC */
 
+
+
+
+/* QUICK SEARCH PAGE SPECIFIC */
 #result-container-outer {
   height: 90%;
 }
@@ -162,4 +166,56 @@ main h2 {
   height: 100%;
   margin: 0 20px 20px 20px;
   background-color: #333;
+}
+#search-container {
+  height: 100%;
+  border-right: 2px solid #868784;
+}
+#add-feed, #add-keyterm {
+}
+.add-form {
+  padding-bottom: 10px;
+}
+.add-form label {
+  display: block;
+  margin: 0 auto;
+  margin-top: 10px;
+  text-align: center;
+}
+.add-form input {
+  display: block;
+  margin: 0 auto;
+  margin-top: 10px;
+  text-align: center;
+}
+.word-box {
+  height: 50%;
+}
+.word-box p {
+  text-decoration: underline;
+  padding-bottom: 5px;
+}
+.word-box li {
+  list-style: none;
+}
+#start-search {
+  padding: 5px 10px;
+  font-size: 16px;
+  border-radius: 2px;
+}
+#search-results {
+  padding-top: 10px;
+  height: 90%;
+  /*overflow: scroll;*/
+  -webkit-column-count: 2; /* Chrome, Safari, Opera */
+  -moz-column-count: 2; /* Firefox */
+  column-count: 2;
+  -webkit-column-rule: 1px dotted #999; /* Chrome, Safari, Opera */
+  -moz-column-rule: 1px dotted #999; /* Firefox */
+  column-rule: 1px dotted #999;
+}
+#search-results p a {
+  text-decoration: none;
+  font-size: 12px;
+  text-transform: capitalize;
 }
