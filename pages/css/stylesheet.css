@@ -107,6 +107,8 @@ main h2 {
   height: 20%;
 }
 
+/* AUTOMATAED SEARCH GENERAL */
+
 .configuration {
   height: 45%;
 }
@@ -148,4 +150,16 @@ main h2 {
   cursor: default;
   transform: scale(1.2);
   transition: all 0.5s;
+}
+
+/* AUTOMATED SEARCH RESULTS PAGE SPECIFIC */
+
+#result-container-outer {
+  height: 90%;
+}
+
+#result-container-inner {
+  height: 100%;
+  margin: 0 20px 20px 20px;
+  background-color: #333;
 }

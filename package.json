@@ -18,7 +18,9 @@
   },
   "homepage": "https://github.com/jamesemwallis/Article-Hunter#readme",
   "dependencies": {
+    "body-parser": "^1.17.2",
     "express": "^4.15.3",
+    "feed-read-parser": "0.0.6",
     "mysql": "^2.14.0"
   }
 }

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Article Hunter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Lato|Raleway" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
+    <link href="/stylesheet.css" rel="stylesheet" type="text/css">
+ </head>
+  <body>
+    <header class="col-12">
+      <h1>Article Hunter</h1>
+      <nav>
+        <ul>
+          <li><a href="index.html">Automated Search</a></li>
+          <li><a href="#"  id="active">Quick Search</a></li>
+          <li><a href="#">Trending Feeds</a></li>
+        </ul>
+      </nav>
+    </header>
+    <main class="col-12">
+      <div class="col-12">
+        <h2>Quick Search</h2>
+      </div>
+      <div id="result-container-outer" class="col-12">
+        <div id="result-container-inner" class="">
+          <div class="col-3">
+            <h3>Search</h3>
+            <form id="quick-search" action="/api/search" method="post">
+              <div class="">
+                <label for="feed">Search Feed</label>
+                <input type="text" name="feed" id="feed-url-input" value="" placeholder="Enter Feed">
+              </div>
+              <!-- <div class="">
+                <label for=""></label>
+                <input type="text" name="" id="" value="" placeholder="">
+              </div>
+              <div class="">
+                <label for=""></label>
+                <input type="text" name="" id="" value="" placeholder="">
+              </div> -->
+              <input type="submit" name="submit" value="Search">
+            </form>
+          </div>
+          <div class="col-9">
+            <h3>Results</h3>
+            <div id="search-results" class="">
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script src="rss.js"></script>
+  </body>
+</html>
