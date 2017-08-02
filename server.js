@@ -26,6 +26,8 @@ var userFeed;
 var userFeedList = [];
 //Initialise userKeywordList for use for multiple keyword searches
 var userKeywordList = [];
+//Create list of already found RSS feeds
+var listOfArticles = [];
 
 
 // Constant page directory
@@ -64,8 +66,9 @@ console.log("Available on port 8000\n");
 //Server functions
 app.get('/api/search', sendFeed);
 app.post('/api/search', postFeed);
-app.post('/api/addFeed', addFeed);
-app.post('/api/addKeyword', addKeyword);
+app.get('/api/feed', sendFeedList);
+app.post('/api/feed', addFeed);
+app.post('/api/keyword', addKeyword);
 
 
 //Send Feed will parse the given RSS feed and return it as JSON
@@ -76,6 +79,7 @@ function sendFeed(req, res) {
       //Send error 404 as there is no content
       res.status(404).send('Something broke!');
     };
+    listOfArticles = articles;
     res.json(articles);
   });
 }
@@ -127,6 +131,14 @@ function addKeyword(req, res) {
     // XML HTTP request that accepts JSON will instead get that
     res.json({searchurl: req.body.newKeyword});
   }
+}
+
+function sendKeywordList(req, res) {
+  res.json({userKeywordList});
+}
+
+function sendFeedList(req, res) {
+  res.json({userFeedList});
 }
 
 
