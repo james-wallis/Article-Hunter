@@ -1,8 +1,9 @@
 /*
  * The Server for the Article Hunter RSS Feed Trawler.
  */
-
 'use static'
+//Modules
+// var stack = require('./pages/js/stackoverflowModuleUSETHISFORSERVER.js');
 var express = require('express');
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
@@ -23,7 +24,7 @@ var testFeedList = [
 //Initialise userFeed variable for quick search
 var userFeed;
 //Initialise userFeedList for use of automated and multiple feed search
-var userFeedList = [];
+var userFeedList = ["http://rss.slashdot.org/Slashdot/slashdotDevelopers"];
 //Initialise userKeywordList for use for multiple keyword searches
 var userKeywordList = [];
 //Create list of already found RSS feeds
@@ -33,12 +34,12 @@ var listOfArticles = [];
 // Constant page directory
 var pages = __dirname + '/pages/html';
 var stylesheet = __dirname + '/pages/css';
-// var script = __dirname + '/pages/js';
+var script = __dirname + '/pages/js';
 
 // Static files
 app.use('/', express.static(pages, { extensions: ['html'] }));
 app.use('/', express.static(stylesheet, { extensions: ['css'] }));
-// app.use('/', express.static(script, { extensions: ['js'] }));
+app.use('/', express.static(script, { extensions: ['js'] }));
 
 /**
  * Parses the text as URL encoded data and exposes the resulting object on req.body
@@ -62,7 +63,6 @@ app.listen(8000);
 console.log("\nArticle Hunter has been loaded!");
 console.log("Available on port 8000\n");
 
-
 //Server functions
 app.get('/api/search', sendFeed);
 app.post('/api/search', postFeed);
@@ -80,6 +80,7 @@ function sendFeed(req, res) {
       res.status(404).send('Something broke!');
     };
     listOfArticles = articles;
+    console.log(articles[0]);
     res.json(articles);
   });
 }
@@ -140,52 +141,3 @@ function sendKeywordList(req, res) {
 function sendFeedList(req, res) {
   res.json({userFeedList});
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//RSS FEED TESTING
-var rss = [
-  // 'http://www.eurogamer.net/?format=rss',
-  // 'http://fr.ign.com/feed.xml',
-  // 'http://www.gamekult.com/feeds/actu.html',
-  'https://stackoverflow.com/feeds/tag?tagnames=java&sort=newest',
-  'https://stackoverflow.com/feeds/tag?tagnames=node.js&sort=newest',
-  'https://groups.google.com/forum/feed/nodejs/topics/rss.xml',
-  'http://rss.slashdot.org/Slashdot/slashdotDevelopers',
-  'https://groups.google.com/forum/feed/swift-language/topics/rss.xml'
-]
-
-// feed(rss, function(err, articles) {
-//     // if (err) throw err;
-//     // articles is an array of article with properties described above.
-//     // for (var i = 0; i < articles.length; i++) {
-//     //   console.log(articles[i][0]);
-//     // }
-//     // console.log(articles.length);
-//     // console.log(articles[10]);
-//     // console.log("\n\n");
-//     // console.log(articles[20]);
-//     // console.log("\n\n");
-//     // console.log(articles[50]);
-// });

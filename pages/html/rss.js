@@ -1,4 +1,6 @@
 'use strict';
+
+
 //Event Listeners
 // window.addEventListener('load', loadRSSFeeds);
 // document.getElementById('quick-search').addEventListener("submit", quickSearch);

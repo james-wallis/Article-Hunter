@@ -30,7 +30,7 @@
             <form id="add-feed" action="/api/feed" method="post">
               <div class="add-form">
                 <label for="feed">Add Feed</label>
-                <input type="text" name="feed" id="feed-url-input" value="https://stackoverflow.com/feeds/tag?tagnames=java&sort=newest" placeholder="Enter Feed">
+                <input type="text" name="feed" id="feed-url-input" value="" placeholder="Enter Feed">
               </div>
               <input type="submit" name="submit" value="Add Feed">
             </form>
@@ -67,6 +67,7 @@
         </div>
       </div>
     </main>
-    <script src="rss.js"></script>
+    <script type="text/javascript" src="rss.js"></script>
+    <script type="text/javascript" src="stackoverflow.js"></script>
   </body>
 </html>
