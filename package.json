@@ -21,6 +21,7 @@
     "body-parser": "^1.17.2",
     "express": "^4.15.3",
     "feed-read-parser": "0.0.6",
-    "mysql": "^2.14.0"
+    "mysql": "^2.14.0",
+    "node-fetch": "^1.7.1"
   }
 }

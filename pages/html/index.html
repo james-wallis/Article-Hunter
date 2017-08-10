@@ -10,25 +10,50 @@
  </head>
   <body>
     <header class="col-12">
-      <h1>Article Hunter</h1>
-      <nav>
-        <ul>
-          <li><a href="#" id="active">Automated Search</a></li>
-          <li><a href="quick-search.html">Quick Search</a></li>
-          <li><a href="#">Trending Feeds</a></li>
+      <nav class="col-12">
+        <div class="col-2" id="name-div">
+          <h1>Article Hunter</h1>
+        </div>
+        <div class="col-6" id="">
+
+        </div>
+        <ul class="col-4">
+          <!-- Only one page needed at the moment, uncomment when needed -->
+          <li><a href="" id="active">Automated Search</a></li>
+          <!-- <li><a href="quick-search.html">Quick Search</a></li>
+          <li><a href="#">Trending Feeds</a></li> -->
         </ul>
       </nav>
     </header>
     <main class="col-12">
-      <div class="col-12">
-        <a href="configuration.html"><i id="setting-icon" class="material-icons">settings</i></a>
-        <h2>Automated Search</h2>
-      </div>
-      <div id="result-container-outer" class="col-12">
-        <div id="result-container-inner" class="">
+      <div id="results-div" class="col-12">
+        <div id="feed-selector-div" class="col-2">
+          <div class="feed-selector">
+            <ul>
+              <li id="setting-icon-list-item"><i class="material-icons" id="setting-icon">settings</i></li>
+              <li id="stack-overflow-button">Stack Overflow</li>
+              <li id="google-forum-button">Google Forums</li>
+              <li>Mozilla Development</li>
+            </ul>
+          </div>
+          <div id="page-select" class="col-12">
+            <div class="col-12 no-padding">
+              <p>Current Page: <span id="display-page-number"></span></p>
+            </div>
+            <div class="col-12 no-side-padding">
+              <a id="previous-page" class="page-button no-select">Previous</a>
+              <a id="next-page" class="page-button no-select">Next</a>
+            </div>
 
+          </div>
         </div>
-      </div>
+        <div id="search-results" class="col-10">
+          <p style="padding-top: 50px; color:#D2D4C8">Select a tab on the left to display results from the automated search</p>
+          <p style="padding-top: 10px; color:#D2D4C8">Use the settings tab '<i class="material-icons" style="font-size:20px; vertical-align:bottom">settings</i>' to configure the automated search.</p>
+        </div>
     </main>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="automated-page/automated-search-v2.js"></script>
+    <script type="text/javascript" src="automated-page/automated-search-settings.js"></script>
   </body>
 </html>

@@ -22,18 +22,21 @@
     <main class="col-12">
       <div class="col-12">
         <h2>Quick Search</h2>
+        <p>This page displays results for a quick search - search \
+          using your own keywords and feeds that you do not want to be part of the automated search. </p>
       </div>
       <div id="result-container-outer" class="col-12">
         <div id="result-container-inner" class="">
-          <div id="search-container" class="col-4">
+          <div id="search-container" class="col-2">
             <h3>Search</h3>
-            <form id="add-feed" action="/api/feed" method="post">
+            <!-- Remove feed adding from site for future development   -->
+            <!-- <form id="add-feed" action="/api/feed" method="post">
               <div class="add-form">
                 <label for="feed">Add Feed</label>
                 <input type="text" name="feed" id="feed-url-input" value="" placeholder="Enter Feed">
               </div>
               <input type="submit" name="submit" value="Add Feed">
-            </form>
+            </form> -->
             <form id="add-keyterm" action="/api/keyword" method="post">
               <div class="add-form">
                 <label for="keyterm">Add Keyword</label>
@@ -41,13 +44,13 @@
               </div>
               <input type="submit" name="submit" value="Add Keyterm">
             </form>
-            <div class="col-6 word-box">
-              <p>Feeds</p>
-              <ul id="feed-list">
+            <!-- <div class="col-6 word-box"> -->
+              <!-- <p>Feeds</p> -->
+              <!-- <ul id="feed-list"> -->
                 <!-- Feeds to search through go here -->
-              </ul>
-            </div>
-            <div class="col-6 word-box">
+              <!-- </ul> -->
+            <!-- </div> -->
+            <div class="col-12 word-box">
               <p>Keywords</p>
               <ul id="keyword-list">
                 <!-- Keywords to search go here -->
@@ -58,9 +61,20 @@
               <button id="start-search" type="button" name="search">Search</button>
             </div>
           </div>
-          <div class="col-8">
-            <h3>Results</h3>
-            <div id="search-results" class="">
+          <div id="results-div" class="col-10">
+            <div class="col-12">
+              <h3>Results</h3>
+            </div>
+            <div id="feed-selector-div" class="col-2">
+              <div class="feed-selector">
+                <ul>
+                  <li id="stack-overflow-button">Stack Overflow</li>
+                  <li>Google Forums</li>
+                  <li>Mozilla Development</li>
+                </ul>
+              </div>
+            </div>
+            <div id="search-results" class="col-10">
 
             </div>
           </div>

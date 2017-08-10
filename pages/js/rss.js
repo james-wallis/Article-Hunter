@@ -4,10 +4,10 @@
 //Event Listeners
 // window.addEventListener('load', loadRSSFeeds);
 // document.getElementById('quick-search').addEventListener("submit", quickSearch);
-document.getElementById('add-feed').addEventListener("submit", addNewFeed);
-document.getElementById('add-keyterm').addEventListener("submit", addNewKeyword);
-document.getElementById('start-search').addEventListener("click", search);
-window.addEventListener('load', loadFeeds);
+// document.getElementById('add-feed').addEventListener("submit", addNewFeed);
+// document.getElementById('add-keyterm').addEventListener("submit", addNewKeyword);
+// document.getElementById('start-search').addEventListener("click", search);
+// window.addEventListener('load', loadFeeds);
 
 
 //Functions
