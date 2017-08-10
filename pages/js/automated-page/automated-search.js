@@ -1,158 +1,71 @@
 'use strict'
+/**
+ * The JavaScript scripts which dictate how the automated search page is run on Article-Hunter.
+ * Author: James Wallis
+ */
 
-//Global Variables
+
+/**
+ * Global Variables
+ *    serverArticles:   The list of articles that are loaded from the
+ *                      server using socket.io.
+ *    amountOnPage:     The amount of articles that are displayed on each page.
+ *    amountOfColumns:  The amount of columns on a each page.
+ *    currentPage:      The current page that the user is on.
+ *    activeFeed:       The feed that is currently been displayed.
+ */
 var serverArticles = {};
-//Doesn't work as we're not checking the length of serverArticles but serverArticles.stackoverflow
-var servArtLength = 0;
-var amountOnPage = 30;
+var amountOnPage = 9;
 var amountOfColumns = 3;
-var currentPage = 0;
-var activeFeed;
-var buttonsDisplayed = false;
-var seconds = 30;
-var timer;
+var currentPage = 1;
+var activeFeed = null;
 
 
-//Event Listeners
-//Load discoveredArticles array on page load - this will be refreshed later using a refresh button
-window.addEventListener('load', setUpdateTimer);
-// window.addEventListener('load', loadDiscoveredArticles);
+/**
+ * Event Listeners
+ * Onload:
+ *    - loadDiscoveredArticles attatches the client to the server through socket.io.
+ *    - changeButtonWidth modifies the button widths for next and previous so that they
+ *                        dynamically fit the size of the side bar.
+ * Resize:
+ *    - changeButtonWidth modifies the button widths for next and previous when the
+ *                        side bar size changes.
+ * Onclick:
+ *    - showStackOverflow when the user selects to see the stack overflow results
+ *                        the function is run and it will display each element in the
+ *                        stackoverflow array (serverArticles.stackoverflow)
+ */
+window.addEventListener('load', loadDiscoveredArticles);
 window.addEventListener('load', changeButtonWidth);
-//update width of button selector on window resize
 window.addEventListener('resize', changeButtonWidth);
-document.getElementById('stack-overflow-button').addEventListener('click', loadFeed);
-document.getElementById('google-forum-button').addEventListener('click', loadFeed);
-document.getElementById('setting-icon-list-item').addEventListener('click', stopFeed);
+document.getElementById('stack-overflow-button').addEventListener('click', showStackOverflow);
 
-
-
-//General Data/Atricles JavaScript
+/**
+ * Function to load the discovered articles from the server.
+ * Sets up the socket.io so that it is listening for articles when they are sent.
+ * Articles are only sent from the server if the list length is changed.
+ * If there are already articles being displayed on the page it will refresh these
+ *    adding the new articles to the page.
+ */
 function loadDiscoveredArticles() {
-  var url = '/api/automated';
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', url, true);
-  xhr.onload = function() {
-    if (xhr.status === 200) {
-      serverArticles = (JSON.parse(xhr.responseText));
-      console.log(serverArticles.stackoverflow.length);
-      // console.log(serverArticles);
-      // console.log(serverArticles.stackoverflow);
-    } else if (xhr.status === 404) {
-      //Get error if no elements are in list
-      // document.getElementById('search-results').innerHTML =
-      // '<p>The RSS feed url that you have provided does not return valid \
-      //   RSS style data.</p><p>Please check your url.</p>';
-      console.log("Caught 404");
-    } else {
-      // document.getElementById('search-results').innerHTML =
-      // 'Sorry, there was an error when fetching the Stack Overflow Data.';
-      console.log("Error loading articles from server");
+  var socket = io();
+  socket.on('articles', function(articles){
+    serverArticles = articles;
+    if (activeFeed != null) {
+      refreshFeed();
     }
-  }
-  xhr.send();
+  });
 }
-
-//Function to set update timer for the list
-function setUpdateTimer() {
-  loadDiscoveredArticles();
-  timer = setInterval(refreshFeed, (seconds*1000));
-}
-
-//Function to change the width of the div which contains the 'next' and 'previous' buttons
-function changeButtonWidth() {
-  var feedSelectorWidth = document.getElementById('feed-selector-div').clientWidth;
-  var pageSelectorDiv = document.getElementById('page-select');
-  pageSelectorDiv.style.width = feedSelectorWidth + "px";
-}
-
-//Function to determine whether to show page buttons
-function determinePageButtonShow(list) {
-  var pageSelectorDiv = document.getElementById('page-select');
-  if (list.length > amountOnPage && buttonsDisplayed === false) {
-    pageSelectorDiv.style.display = "block";
-    buttonsDisplayed = true;
-    document.getElementById('previous-page').addEventListener('click', decrementPageNumber);
-    document.getElementById('next-page').addEventListener('click', incrementPageNumber);
-    document.getElementById('display-page-number').textContent = currentPage+1;
-  } else if (list.lenth <= amountOnPage){
-    console.log("else");
-    pageSelectorDiv.style.display = "none";
-    buttonsDisplayed = false;
-    document.getElementById('previous-page').removeEventListener('click', decrementPageNumber);
-    document.getElementById('next-page').removeEventListener('click', incrementPageNumber);
-  }
-}
-
-//Functions to increase and decrease pageNumbers
-function incrementPageNumber() {
-  currentPage++;
-  document.getElementById('display-page-number').textContent = currentPage+1;
-  console.log(currentPage);
-  refreshFeed();
-}
-function decrementPageNumber() {
-  currentPage--;
-  document.getElementById('display-page-number').textContent = currentPage+1;
-  console.log(currentPage);
-  refreshFeed();
-}
-
-//General function to clear class from all feed buttons for active-feed
-function clearActiveClass() {
-  document.getElementById('setting-icon-list-item').classList.remove('active-feed');
-  document.getElementById('stack-overflow-button').classList.remove('active-feed');
-  document.getElementById('google-forum-button').classList.remove('active-feed');
-}
-
-
-//Function to determine and load the correct feed
-function loadFeed(e) {
-  //Get ID of button that was clicked
-  var id = e.target.id;
-  //Clear active class for navigation
-  clearActiveClass();
-  //Add active class to active navigation button
-  document.getElementById(id).classList.add('active-feed');
-  //Check server for new articles
-  loadDiscoveredArticles();
-  //If statement to determine which feed is active
-  if (id.includes("stack") && id.includes("overflow")) {
-    activeFeed = "stackoverflow";
-    loadStackOverflow();
-  } else if (id.includes("google") && id.includes("forum")) {
-    activeFeed = "googleforums";
-    loadGoogleForums();
-  }
-}
-
-function stopFeed() {
-  clearInterval(timer);
-}
-
-//Function to refresh the currently loaded feed
-function refreshFeed() {
-  loadDiscoveredArticles();
-  //If statement to determine which feed is active
-  if (activeFeed === "stackoverflow") {
-    loadStackOverflow();
-  } else if (activeFeed === "googleforums") {
-    loadGoogleForums();
-  }
-  console.log(serverArticles.stackoverflow.length);
-}
-
 
 //Stack Overflow specific
-function loadStackOverflow(e) {
-  // serverArticles = {"stackoverflow": [{'id':'The ID Of this thing', 'body': 'The Body Of This Thing', 'link': 'the link', 'tags': '[one, two, three]', 'title': 'The title of this'}]}
-  //Get up-to-date article list from server
+function showStackOverflow(e) {
+  clearActive();
+  //Set stack-overflow as active
+  activeFeed = 'stackoverflow';
+  document.getElementById('stack-overflow-button').classList.add('active-feed');
   var soList = serverArticles.stackoverflow;
-  // console.log(serverArticles);
-  // console.log(serverArticles.stackoverflow);
-
   var container = document.getElementById('search-results');
   container.innerHTML = '';
-
   if (soList.length <= 0) {
     container.innerHTML = "<p style='padding-top: 50px; color:#D2D4C8'> \
                             Oops! It seems that there are no articles available for Stack Overflow.</p>";
@@ -167,7 +80,7 @@ function loadStackOverflow(e) {
     column.classList.add('col-4');
     var i=0;
     //Offset index for correct page display
-    var index = i+(currentPage * amountOnPage);
+    var index = i+((currentPage-1) * amountOnPage);
     while (i<soList.length && index<soList.length) {
       var div = document.createElement('div');
       div.style.cssText = 'padding: 10px';
@@ -176,7 +89,6 @@ function loadStackOverflow(e) {
       a.setAttribute('href', soList[index].link);
       a.setAttribute('target', 'blank');
       a.style.cssText = "text-decoration: none";
-
 
       var el = document.createElement('p');
       el.textContent = (index+1) + ": " + soList[index].title;
@@ -207,12 +119,106 @@ function loadStackOverflow(e) {
     }
   }
   //If soList has more elements than the amount allowed on the page, show page buttons
-  determinePageButtonShow(soList);
+  determinePageButtonShow();
 }
 
 
-//Google Forums specific
-function loadGoogleForums() {
-  var container = document.getElementById('search-results');
-  container.innerHTML = '';
+/**
+ * Function to refresh the active feed
+ */
+function refreshFeed() {
+  if (activeFeed = "stackoverflow") {
+    showStackOverflow();
+  }
+}
+
+
+
+
+
+
+/**
+ * Function to clear the active feed when the user selects another.
+ * Begins by ensuring that no other element has the active-feed class
+ *      which is used to show the user which feed they are currently viewing.
+ * Then sets the activeFeed variable to null so that it doesn't load anymore of
+ *      the previous feed.
+ */
+function clearActive() {
+  document.getElementById('setting-icon-list-item').classList.remove('active-feed');
+  document.getElementById('stack-overflow-button').classList.remove('active-feed');
+  document.getElementById('google-forum-button').classList.remove('active-feed');
+  activeFeed = null;
+}
+
+
+/**
+ * Function to change the width of the next and previous button's container
+ * This helps to ensure that the UI displays correctly no matter the size or
+ *    aspect ratio of the screen.
+ */
+function changeButtonWidth() {
+  var feedSelectorWidth = document.getElementById('feed-selector-div').clientWidth;
+  var pageSelectorDiv = document.getElementById('page-select');
+  pageSelectorDiv.style.width = feedSelectorWidth + "px";
+}
+
+//Function to determine whether to show page buttons
+function determinePageButtonShow() {
+  var list;
+  if (activeFeed === 'stackoverflow') {
+    list = serverArticles.stackoverflow;
+  }
+  var pageSelectorDiv = document.getElementById('page-select');
+  var nextPage = document.getElementById('next-page');
+  var previousPage = document.getElementById('previous-page');
+  if (list.length > amountOnPage) {
+    pageSelectorDiv.style.display = "block";
+    document.getElementById('display-page-number').textContent = currentPage;
+    if (currentPage === 1) {
+      nextPage.addEventListener('click', incrementPageNumber);
+      nextPage.style.display = "inline";
+      if (previousPage.style.display == "inline" || previousPage.style.display == "") {
+        previousPage.style.display = "none";
+      }
+    } else if (list.length < (currentPage*amountOnPage)) {
+      previousPage.addEventListener('click', decrementPageNumber);
+      previousPage.style.display = "inline";
+      if (nextPage.style.display == "inline" || nextPage.style.display == "") {
+        nextPage.style.display = "none";
+      }
+    } else {
+      nextPage.addEventListener('click', incrementPageNumber);
+      previousPage.addEventListener('click', decrementPageNumber);
+      nextPage.style.display = "inline";
+      previousPage.style.display = "inline";
+    }
+  } else if (list.lenth <= amountOnPage){
+    pageSelectorDiv.style.display = "none";
+    nextPage.style.display = "none";
+    previousPage.style.display = "none";
+    previousPage.removeEventListener('click', decrementPageNumber);
+    nextPage.removeEventListener('click', incrementPageNumber);
+  }
+}
+
+//Functions to increase and decrease pageNumbers
+function incrementPageNumber() {
+  currentPage++;
+  updatePage();
+}
+function decrementPageNumber() {
+  currentPage--;
+  updatePage();
+}
+function goToPage(number) {
+  currentPage = number;
+  updatePage();
+
+}
+function updatePage() {
+  document.getElementById('display-page-number').textContent = currentPage;
+  determinePageButtonShow();
+  console.log(currentPage);
+  refreshFeed();
 }
