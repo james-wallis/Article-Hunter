@@ -6,6 +6,16 @@
 * In the future it will support more API's for forums and basic RSS feed trawling.
 
 ## Features
+### Pages:
+ * [Settings](###Settings Page)
+ * [Stack Overflow](###Stack Overflow)
+### Settings Page
+* The Settings page has the abilities to:
+    * Add a new keyword.
+    * Edit an existing keyword.
+    * Remove (delete) a keyword.
+
+### Stack Overflow
 * Currently Article Hunter only has the basic features of reading through the first page of Stack Overflow and after checking through the
 Title, Body and Tags of a post, it will display a list of relevant articles that have matched with any keyword set.
 
