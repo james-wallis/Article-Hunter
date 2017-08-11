@@ -33,8 +33,9 @@
               <li id="setting-icon-list-item"><i class="material-icons" id="setting-icon">settings</i></li>
               <li id="stack-overflow-button">Stack Overflow</li>
               <li id="google-forum-button">Google Forums</li>
-              <li>Mozilla Development</li>
             </ul>
+          </div>
+          <div id="keyword-div">
           </div>
           <div id="page-select" class="col-12">
             <div class="col-12 no-padding">
@@ -53,6 +54,10 @@
         </div>
     </main>
     <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript">
+    //Initialise socket for all js files.
+      var socket = io();
+    </script>
     <script type="text/javascript" src="automated-page/automated-search.js"></script>
     <script type="text/javascript" src="automated-page/automated-search-settings.js"></script>
   </body>

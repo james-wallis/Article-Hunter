@@ -4,7 +4,16 @@
  * Author: James Wallis
  */
 'use strict'
-
+/**
+ * Global Variables
+ *    keywordList:    The list of keywords which is used when editing
+ *                    or deleting a keyword.
+ *    successColour:  The colour that text will be in a success message.
+ *    errorColour:    The colour text will be in an error message.
+ */
+var keywordList = [];
+var successColour = '#ACFFA1';
+var errorColour = '#FF6262';
 /**
  * Event Listeners
  * On Click:
@@ -23,6 +32,12 @@
 document.getElementById('setting-icon-list-item').addEventListener('click', showSettings);
 document.getElementById('setting-icon-list-item').addEventListener('mouseover', rotateCog);
 document.getElementById('setting-icon-list-item').addEventListener('mouseleave', unrotateCog);
+
+/**
+ * Socket.IO Listeners
+ *
+ */
+socket.on('keywordList', displayKeywords);
 
 /**
  * Function to rotate the settings cog in the sidebar.
@@ -45,11 +60,32 @@ function unrotateCog() {
 /**
  * Function to clear the 'active-feed' class from each of the menu items
  *    in the side bar.
+ * Also sets activeFeed variable from automated-search.js to false.
+ *      This stops the feeds being refreshed and loaded into the
+ *      search-results div.
  */
 function clearActiveClass() {
   document.getElementById('setting-icon-list-item').classList.remove('active-feed');
   document.getElementById('stack-overflow-button').classList.remove('active-feed');
   document.getElementById('google-forum-button').classList.remove('active-feed');
+  activeFeed = null;
+}
+
+/**
+ * Function to display the current keywordList in the sidebar.
+ */
+function displayKeywords(list) {
+  keywordList = list;
+  var cont = document.getElementById('keyword-div');
+  cont.textContent = '';
+  var title = document.createElement('h3');
+  title.textContent = "Keywords";
+  cont.appendChild(title);
+  for (var i = 0; i < list.length; i++) {
+    var p = document.createElement('p');
+    p.textContent = list[i];
+    cont.appendChild(p);
+  }
 }
 
 /**
@@ -74,7 +110,7 @@ function showSettings() {
   container.appendChild(div);
 
   //Create 6 divs for settings - each has an id
-  var divIDs = ['add-keyword', 'edit-keyword', 'delete-keyword', 'feed-sources', 'run-times', 'amount-to-display'];
+  var divIDs = ['add-keyword', 'edit-keyword', 'delete-keyword', 'change-sources', 'run-times', 'amount-to-display'];
   var index = 0;
   for (var i = 0; i < 2; i++) {
     var rowCont = document.createElement('div');
@@ -99,7 +135,7 @@ function populateSettings() {
   addKeywordForm();
   editKeywordForm();
   deleteKeywordForm();
-  feedSourcesForm();
+  changeSourcesForm();
   runTimesForm();
   amountToDisplayForm();
 }
@@ -109,6 +145,7 @@ function populateSettings() {
  */
 function addKeywordForm() {
   var cont = document.getElementById('add-keyword');
+  cont.innerHTML = "";
   var title = document.createElement('h3');
   title.textContent = 'Add Keyword';
   cont.appendChild(title);
@@ -116,23 +153,30 @@ function addKeywordForm() {
   //Create Form to submit a new Keyword
   var form = document.createElement('form');
   form.name = "add-keyword";
+  form.id = "add-keyword-form";
   form.method = "POST";
   form.action = "/#";
 
   var input = document.createElement('input');
   input.type = "text";
   input.name = "keyword";
+  input.id = "add-keyword-form-keyword";
   input.placeholder = "Enter Keyword";
 
   var submit = document.createElement('input');
   submit.type = "submit";
   submit.name = "submit-add-keyword";
 
+  var message = document.createElement('p');
+  message.id = 'add-keyword-message';
   // form.appendChild(label);
   form.appendChild(input);
   form.appendChild(submit);
   cont.appendChild(form);
+  cont.appendChild(message);
 
+  //Add Event Listener to Form
+  document.getElementById('add-keyword-form').addEventListener('submit', sendKeyword);
 }
 
 /**
@@ -142,7 +186,13 @@ function addKeywordForm() {
  *      of the input box.
  */
 function editKeywordForm() {
+  var currentKeywords = [];
+  socket.on('keywordList', function(list){
+    currentKeywords = list;
+  });
+  console.log(currentKeywords);
   var cont = document.getElementById('edit-keyword');
+  cont.innerHTML = "";
   var title = document.createElement('h3');
   title.textContent = 'Edit Keyword';
   cont.appendChild(title);
@@ -150,34 +200,42 @@ function editKeywordForm() {
   //Create Form to submit a new Keyword
   var form = document.createElement('form');
   form.name = "edit-keyword";
+  form.id = "edit-keyword-form";
   form.method = "POST";
   form.action = "/#";
 
   var select = document.createElement('select');
   select.name = "edit";
   select.placeholder = "Enter Keyword";
+  select.id = "edit-keyword-select";
 
   //Show all options
-  for (var i = 0; i < 6; i++) {
-    var option = document.createElement('option');
-    option.value = "option"+i;
-    option.textContent = "Option " + i;
-    select.appendChild(option);
-  }
+  var list  = keywordList;
+  selectKeywordOptions(list, 'edit', select);
 
   var input = document.createElement('input');
   input.type = "text";
   input.name = "edit-keyword";
   input.placeholder = "Keyword will appear here";
+  input.readOnly = true;
+  input.id = "edit-keyword-input";
 
   var submit = document.createElement('input');
   submit.type = "submit";
   submit.name = "submit-edit-keyword";
 
+  var message = document.createElement('p');
+  message.id = 'edit-keyword-message';
+
   form.appendChild(select);
   form.appendChild(input);
   form.appendChild(submit);
   cont.appendChild(form);
+  cont.appendChild(message);
+
+  //Add Event Listeners
+  document.getElementById('edit-keyword-select').addEventListener('change', updateEditInput);
+  document.getElementById('edit-keyword-form').addEventListener('submit', editKeyword);
 
 }
 
@@ -187,44 +245,78 @@ function editKeywordForm() {
  */
 function deleteKeywordForm() {
   var cont = document.getElementById('delete-keyword');
+  cont.innerHTML = "";
   var title = document.createElement('h3');
   title.textContent = 'Delete Keyword';
   cont.appendChild(title);
 
   var form = document.createElement('form');
   form.name = "delete-keyword";
+  form.id = 'delete-keyword-form';
   form.method = "POST";
   form.action = "/#";
 
   var select = document.createElement('select');
   select.name = "delete";
   select.placeholder = "Delete Keyword";
+  select.id = "delete-keyword-select";
 
-  //Show all options
-  for (var i = 0; i < 6; i++) {
-    var option = document.createElement('option');
-    option.value = "option"+i;
-    option.textContent = "Option " + i;
-    select.appendChild(option);
-  }
+  var list  = keywordList;
+  selectKeywordOptions(list, 'delete', select);
 
   var submit = document.createElement('input');
   submit.type = "submit";
   submit.value = "Delete Keyword";
   submit.name = "submit-delete-keyword";
 
+  var message = document.createElement('p');
+  message.id = 'delete-keyword-message';
+
   form.appendChild(select);
   form.appendChild(submit);
   cont.appendChild(form);
+  cont.appendChild(message);
+
+  //Event Listener for form submit
+  document.getElementById('delete-keyword-form').addEventListener('submit', deleteKeyword);
 }
+
+/**
+ * Function to populate the options within the two keyword select forms.
+ * Used when the page is loaded to populate and then run again after a change
+ *      occurs to the keywordList.
+ */
+ function selectKeywordOptions(list, task, select) {
+   select.innerHTML = "";
+   //Show all options
+   var option = document.createElement('option');
+   option.setAttribute("hidden", "");
+   option.setAttribute("selected", "");
+   option.setAttribute("disabled", "");
+   option.textContent = "Select a Keyword";
+   select.appendChild(option);
+   //Loop through each unit
+   list.forEach(function (item, index) {
+     option = document.createElement('option');
+     if (task === 'edit') {
+       option.value = item;
+     } else if (task === 'delete') {
+       option.value = index;
+     }
+     option.textContent = item;
+     select.appendChild(option);
+   });
+ }
+
 
 /**
  * Function to add the feedSources form to the settings page.
  * The different sources will be added using items from the server.
  * After a user checks or unchecks an option it will be sent straight to the server.
  */
-function feedSourcesForm() {
-  var cont = document.getElementById('feed-sources');
+function changeSourcesForm() {
+  var cont = document.getElementById('change-sources');
+  cont.innerHTML = "";
   var title = document.createElement('h3');
   title.textContent = 'Feed Sources';
   cont.appendChild(title);
@@ -232,6 +324,7 @@ function feedSourcesForm() {
   //Create Form to submit a new Keyword
   var form = document.createElement('form');
   form.name = "change-sources";
+  form.id = "change-source-form";
   form.method = "POST";
   form.action = "/#";
 
@@ -258,6 +351,7 @@ function feedSourcesForm() {
  */
 function runTimesForm() {
   var cont = document.getElementById('run-times');
+  cont.innerHTML = "";
   var title = document.createElement('h3');
   title.textContent = 'Run Times';
   cont.appendChild(title);
@@ -270,6 +364,7 @@ function runTimesForm() {
  */
 function amountToDisplayForm() {
   var cont = document.getElementById('amount-to-display');
+  cont.innerHTML = "";
   var title = document.createElement('h3');
   title.textContent = 'Layout of Articles';
   cont.appendChild(title);
@@ -311,4 +406,91 @@ function amountToDisplayForm() {
   }
   div.appendChild(select);
   cont.appendChild(div);
+}
+
+/**
+ * Function to update the input in the edit keyword field
+ */
+ function updateEditInput() {
+   var select = document.getElementById('edit-keyword-select');
+   var input = document.getElementById('edit-keyword-input');
+   input.readOnly = false;
+   input.value = select.value;
+ }
+
+//FUNCTIONS TO SEND FORMS TO SERVER
+function sendKeyword(e) {
+  var eventId = event.target.id;
+  event.preventDefault();
+  var newWord = document.getElementById('add-keyword-form-keyword').value;
+  var message = document.getElementById('add-keyword-message');
+  if (newWord != "" && newWord != null) {
+    newWord = newWord.toLowerCase();
+    if (!(keywordList.indexOf(newWord) >= 0)) {
+      message.textContent = "Success! '" + newWord + "' added to the list of keywords.";
+      message.style.color = successColour;
+      socket.emit('addKeyword', newWord);
+    } else if (keywordList.indexOf(newWord) >= 0){
+      message.textContent = "Error: The keyword is already in the list.";
+      message.style.color = errorColour;
+    } else {
+      message.textContent = "Error";
+      message.style.color = errorColour;
+    }
+  } else {
+    message.textContent = "Error: Keyword field is blank.";
+    message.style.color = errorColour;
+  }
+}
+
+function editKeyword(e) {
+  var eventId = event.target.id;
+  event.preventDefault();
+  var message = document.getElementById('edit-keyword-message');
+  var old = document.getElementById('edit-keyword-select').value;
+  var edit = document.getElementById('edit-keyword-input').value;
+  edit = edit.toLowerCase();
+  console.log(edit);
+  if (edit !== null && edit !== "" && old !== null && old !== "") {
+    if (edit !== old) {
+      var index = keywordList.indexOf(old);
+      var json = {
+        'index': index,
+        'edit': edit
+      }
+      message.textContent = "Success! '" + old + "' has been replaced with '" +
+                              edit + "' in the list of keywords.";
+      message.style.color = successColour;
+      var list = keywordList;
+      list[index] = edit;
+      var select = document.getElementById('edit-keyword-select');
+      socket.emit('editKeyword', json);
+      selectKeywordOptions(list, 'edit', select);
+    } else {
+      message.textContent = "Error: Old and New Keyword are the same.";
+      message.style.color = errorColour;
+    }
+  } else {
+    message.textContent = "Error: Keyword field is blank.";
+    message.style.color = errorColour;
+  }
+}
+
+function deleteKeyword(e) {
+  var eventId = event.target.id;
+  event.preventDefault();
+  var message = document.getElementById('delete-keyword-message');
+  var index = document.getElementById('delete-keyword-select').value;
+  if (Number.isInteger(parseInt(index))) {
+    message.textContent = "Success! The keyword has been removed from the list.";
+    message.style.color = successColour;
+    var list = keywordList;
+    list.splice(index, 1);
+    var select = document.getElementById('delete-keyword-select');
+    socket.emit('deleteKeyword', index);
+    selectKeywordOptions(list, 'delete', select);
+  } else {
+    message.textContent = "Error: Choose a keyword to delete.";
+    message.style.color = errorColour;
+  }
 }

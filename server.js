@@ -84,6 +84,11 @@ io.on('connection', function(socket){
   socket.on('disconnect', function(){
     console.log('user disconnected');
   });
+
+  io.emit('keywordList', userKeywordList);
+  socket.on('addKeyword', addKeyword);
+  socket.on('editKeyword', editKeyword);
+  socket.on('deleteKeyword', deleteKeyword);
 });
 
 //Function which runs all data collector functions
@@ -102,7 +107,6 @@ function startFeedCollection() {
 
 //Function used as a call back
 function stackOverflowCallback(list) {
-  // console.log(list.length);
   addNewStackOverflowToList(list);
 }
 
@@ -117,14 +121,14 @@ function addNewStackOverflowToList(list) {
     for (var i = 0; i<soList.length; i++) {
       var found = false;
       var j = 0;
-        while ((found === false) && (j < list.length)) {
-          if (soList[i].id == list[j].id) {
-            list.splice(j, 1);
-            numberSame++;
-            found = true;
-          }
-          j++;
+      while ((found === false) && (j < list.length)) {
+        if (soList[i].id == list[j].id) {
+          list.splice(j, 1);
+          numberSame++;
+          found = true;
         }
+        j++;
+      }
     }
     soList = soList.concat(list);
     console.log("previousListLength: " + previousListLength);
@@ -140,6 +144,27 @@ function addNewStackOverflowToList(list) {
     io.emit('articles', discoveredArticles);
   }
   console.log("Stack Overflow List Length: " + discoveredArticles.stackoverflow.length);
+}
+
+//Settings Page Functions
+function addKeyword(keyword) {
+  keyword = keyword.toLowerCase();
+  if (keyword !== "" && keyword !== null && !(userKeywordList.indexOf(keyword) >= 0)) {
+    userKeywordList.push(keyword);
+  }
+  io.emit('keywordList', userKeywordList);
+}
+
+function editKeyword(json) {
+  var index = json.index;
+  var keyword = json.edit;
+  userKeywordList[index] = keyword;
+  io.emit('keywordList', userKeywordList);
+}
+
+function deleteKeyword(index) {
+  userKeywordList.splice(index, 1);
+  io.emit('keywordList', userKeywordList);
 }
 
 

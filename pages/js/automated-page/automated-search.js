@@ -15,7 +15,7 @@
  *    activeFeed:       The feed that is currently been displayed.
  */
 var serverArticles = {};
-var amountOnPage = 9;
+var amountOnPage = 30;
 var amountOfColumns = 3;
 var currentPage = 1;
 var activeFeed = null;
@@ -39,6 +39,7 @@ window.addEventListener('load', loadDiscoveredArticles);
 window.addEventListener('load', changeButtonWidth);
 window.addEventListener('resize', changeButtonWidth);
 document.getElementById('stack-overflow-button').addEventListener('click', showStackOverflow);
+document.getElementById('setting-icon-list-item');
 
 /**
  * Function to load the discovered articles from the server.
@@ -48,9 +49,10 @@ document.getElementById('stack-overflow-button').addEventListener('click', showS
  *    adding the new articles to the page.
  */
 function loadDiscoveredArticles() {
-  var socket = io();
   socket.on('articles', function(articles){
     serverArticles = articles;
+    console.log("refresh");
+    console.log(activeFeed);
     if (activeFeed != null) {
       refreshFeed();
     }

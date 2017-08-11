@@ -53,8 +53,8 @@ function checkForKeywords(item, keywordList) {
   wordArr = keywordList;
   for (var i = 0; i < wordArr.length; i++) {
     var word = wordArr[i];
-    if ((item.title.indexOf(word) > -1) ||
-    (item.body.indexOf(word) > -1) ||
+    if ((item.title.toLowerCase().indexOf(word) > -1) ||
+    (item.body.toLowerCase().indexOf(word) > -1) ||
     (item.tags.indexOf(word) > -1)) {
       var newJson = {
         'id': item.question_id,

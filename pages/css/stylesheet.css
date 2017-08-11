@@ -305,7 +305,8 @@ main {
   display: block;
   padding: 2px 5px;
   margin: 10px auto;
-  color: #b8bca9;
+  color: #000;
+  text-align: center;
 }
 .automated-settings form label {
   color: rgb(210, 212, 200);
@@ -316,4 +317,20 @@ main {
   display: inline-block;
   padding: 0;
   margin: 5px;
+}
+
+/* Keywords in Sidebar */
+#keyword-div {
+  margin-top: 30px;
+}
+#keyword-div h3 {
+  color: #D2D4C8;
+  font-size: 20px;
+  padding-bottom: 3px;
+  font-weight: lighter;
+}
+#keyword-div p {
+  padding: 2px 0;
+  text-transform: uppercase;
+  font-size: 14px;
 }
