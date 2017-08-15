@@ -18,17 +18,17 @@
  *    currentKeyword:   If this is set and showAll is false, the only results on
  *                      the automated search page will be found using the specified
  *                      keyword.
- *    lastListNumber:   The list index of the last element printed to the page.
+ *    pageListIndex:    A list of index's of the last element printed to the page.
  */
 var serverArticles = {};
-var amountOnPage = 21;
+var amountOnPage = 9;
 var amountOfColumns = 3;
 var currentPage = 1;
 var activeFeed = null;
 var keywordList = [];
 var showAll = true;
 var currentKeyword = '';
-var lastListNumber = '';
+var pageListIndex = [0];
 
 
 /**
@@ -77,7 +77,7 @@ function loadDiscoveredArticles() {
 }
 
 //Stack Overflow specific
-function showStackOverflow(e) {
+function showStackOverflow(event) {
   clearActive();
   //Set stack-overflow as active
   activeFeed = 'stackoverflow';
@@ -101,22 +101,15 @@ function showStackOverflow(e) {
     column.classList.add('col-4');
     var i=0;
     //Offset index for correct page display when displaying all
-
-    //
-    //
-    //
-    // START BY FIXING PAGE CHANGING WHEN SHOWING SPECIFIC KEYWORDS
-    //
-    //
-    //
-
-    var index = i+((currentPage-1) * amountOnPage);
-    if (currentPage > 1 && currentKeyword != '') {
-      console.log('l');
-      index = lastListNumber;
+    var index;
+    if (showAll || pageListIndex.length === 1) {
+      index = i+((currentPage-1) * amountOnPage);
+    } else {
+      index = pageListIndex[currentPage-1];
     }
+
     while (i<soList.length && index<soList.length) {
-      if (soList[i].keyword == currentKeyword || showAll) {
+      if (soList[index].keyword === currentKeyword || showAll) {
         var div = document.createElement('div');
         div.style.cssText = 'padding: 10px';
 
@@ -126,7 +119,7 @@ function showStackOverflow(e) {
         a.style.cssText = "text-decoration: none";
 
         var el = document.createElement('p');
-        el.textContent = (index+1) + ": " + soList[index].title + " --- " + soList[i].title;
+        el.textContent = (index+1) + ": " + soList[index].title;
         el.style.cssText = "text-transform: capitalize; color: #D2D4C8";
         a.appendChild(el);
 
@@ -146,7 +139,8 @@ function showStackOverflow(e) {
         if (articleCounter == amountInColumn) {
           columnCounter++;
           if (columnCounter == amountOfColumns) {
-            lastListNumber = index;
+            pageListIndex[currentPage] = (index+1);
+            console.log(pageListIndex);
             break;
           }
           container.appendChild(column);
@@ -167,7 +161,7 @@ function showStackOverflow(e) {
 /**
  * Function to display all the elements in the google forums array on the page
  */
-function showGoogleForums(e) {
+function showGoogleForums(event) {
   clearActive();
   //Set stack-overflow as active
   activeFeed = 'googleforum';
@@ -190,13 +184,14 @@ function showGoogleForums(e) {
     var column = document.createElement('div');
     column.classList.add('col-4');
     var i=0;
-
-    var index = i+((currentPage-1) * amountOnPage);
-    if (currentPage > 1 && currentKeyword != '') {
-      index = lastListNumber;
+    var index;
+    if (showAll || pageListIndex.length === 1) {
+      index = i+((currentPage-1) * amountOnPage);
+    } else {
+      index = pageListIndex[currentPage-1];
     }
     while (i<googleList.length && index<googleList.length) {
-      if (googleList[i].keyword == currentKeyword || showAll) {
+      if (googleList[index].keyword == currentKeyword || showAll) {
         var div = document.createElement('div');
         div.style.cssText = 'padding: 10px';
 
@@ -221,7 +216,8 @@ function showGoogleForums(e) {
         if (articleCounter == amountInColumn) {
           columnCounter++;
           if (columnCounter == amountOfColumns) {
-            lastListNumber = index;
+            // console.log(index);
+            // nextListIndex = index+1;
             break;
           }
           container.appendChild(column);
@@ -243,11 +239,11 @@ function showGoogleForums(e) {
  * Function to refresh the active feed
  */
 function refreshFeed() {
-  console.log('refresh');
   if (activeFeed === "stackoverflow") {
     console.log('stack refresh');
     showStackOverflow();
   } else if (activeFeed === "googleforum") {
+    console.log('google forum');
     showGoogleForums();
   }
 }
@@ -284,16 +280,16 @@ function createKeywordSelector(cont) {
   document.getElementById('all').addEventListener('click', function() {
     showAll = true;
     currentKeyword = '';
-    console.log(currentKeyword);
-    lastListNumber = '';
+    pageListIndex = [0];
+    currentPage = 1;
     refreshFeed();
   });
   for (var i = 0; i < arr.length; i++) {
     document.getElementById(arr[i]).addEventListener('click', function() {
       currentKeyword =  this.id;
       showAll = false;
-      console.log(currentKeyword);
-      lastListNumber = '';
+      pageListIndex = [0];
+      currentPage = 1;
       refreshFeed();
     });
   }
@@ -333,8 +329,20 @@ function determinePageButtonShow() {
   var list;
   if (activeFeed === 'stackoverflow') {
     list = serverArticles.stackoverflow;
+    // console.log(list);
   } else if (activeFeed === 'googleforum') {
     list = serverArticles.googleforums;
+  }
+  var tempList = [];
+  if (currentKeyword) {
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].keyword === currentKeyword) {
+        tempList.push(list[i]);
+        // console.log(i+1 + " " + list[i].keyword);
+      }
+    }
+    list = tempList;
+    // console.log(list);
   }
   var pageSelectorDiv = document.getElementById('page-select');
   var nextPage = document.getElementById('next-page');
@@ -360,7 +368,7 @@ function determinePageButtonShow() {
       nextPage.style.display = "inline";
       previousPage.style.display = "inline";
     }
-  } else if (list.lenth <= amountOnPage){
+  } else if (list.length <= amountOnPage){
     pageSelectorDiv.style.display = "none";
     nextPage.style.display = "none";
     previousPage.style.display = "none";
