@@ -2,7 +2,7 @@ var fetch = require('node-fetch');
 
 //Exported Functions
 module.exports = {
-  getStackOverflowItems: function(callback, keywordList) {
+  getItems: function(callback, keywordList) {
     fetchAPI(callback, keywordList);
   }
 }
@@ -61,7 +61,8 @@ function checkForKeywords(item, keywordList) {
         'title': item.title,
         'body': item.body,
         'tags': item.tags,
-        'link':item.link
+        'link':item.link,
+        'keyword': word
       };
       // console.log(newJson);
       return newJson;

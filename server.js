@@ -5,6 +5,7 @@
 'use static'
 //Modules
 var stack = require('./pages/js/modules/stackoverflowModule.js');
+var google = require('./pages/js/modules/googleforumModule.js');
 //App.listen is here so that socket.io works as expected.
 //This fixes the error which occured possibly due to the redirection of js files below.
 var express = require('express');
@@ -17,12 +18,8 @@ var feed = require("feed-read-parser");
 var fetch = require('node-fetch');
 
 //Old RSS Feeds
-// var testFeed = 'https://stackoverflow.com/feeds/tag?tagnames=java&sort=newest';
-// var emptyFeed = "https://stackoverflow.com/feeds/tag?tagnames=javametrics";
 // var givenFeed = 'http://www.gamekult.com/feeds/actu.html';
 // var testFeedList = [
-//     'https://stackoverflow.com/feeds/tag?tagnames=java&sort=newest',
-//     'https://stackoverflow.com/feeds/tag?tagnames=node.js&sort=newest',
 //     'https://groups.google.com/forum/feed/nodejs/topics/rss.xml',
 //     'http://rss.slashdot.org/Slashdot/slashdotDevelopers',
 //     'https://groups.google.com/forum/feed/swift-language/topics/rss.xml'
@@ -31,13 +28,18 @@ var fetch = require('node-fetch');
 //Initialise userFeed variable for quick search
 var userFeed;
 //Initialise userFeedList for use of automated and multiple feed search
-var userFeedList = ["http://rss.slashdot.org/Slashdot/slashdotDevelopers"];
+var userFeedList = [];
 //Initialise userKeywordList for use for multiple keyword searches
 var userKeywordList = ["java", "swift", "javascript", "ibm", "node"];
+//List of google forums feeds (RSS)
+var googleForumFeeds  = [
+              {'title': 'nodejs', 'source': 'https://groups.google.com/forum/feed/nodejs/topics/rss.xml'},
+              {'title': 'Swift Language', 'source': 'https://groups.google.com/forum/feed/swift-language/topics/rss.xml'}
+            ];
 //Create a list of the data found from the API's and RSS
-var discoveredArticles = {"stackoverflow": []};
+var discoveredArticles = {"stackoverflow": [], "googleforums": []};
 //Set the refresh rate for the feeds (In minutes);
-var minutesTilRefresh = 0.5;
+var minutesTilRefresh = 8;
 //Set the amount of articles displayed on a page at any one time
 var amountOnPage = 30;
 
@@ -86,15 +88,19 @@ io.on('connection', function(socket){
   });
 
   io.emit('keywordList', userKeywordList);
+  io.emit('googleForumFeeds', googleForumFeeds);
   socket.on('addKeyword', addKeyword);
   socket.on('editKeyword', editKeyword);
   socket.on('deleteKeyword', deleteKeyword);
+  socket.on('addGoogleForum', addGoogleForum);
+  socket.on('deleteGoogleFeed', deleteGoogleForum);
 });
 
 //Function which runs all data collector functions
 function getFeeds() {
   console.log("\nSearching Feeds...\n");
-  stack.getStackOverflowItems(stackOverflowCallback, userKeywordList);
+  stack.getItems(stackOverflowCallback, userKeywordList);
+  google.getItems(googleForumCallback, googleForumFeeds, userKeywordList);
 }
 //Start feed collection and timer
 function startFeedCollection() {
@@ -109,8 +115,11 @@ function startFeedCollection() {
 function stackOverflowCallback(list) {
   addNewStackOverflowToList(list);
 }
+function googleForumCallback(list) {
+  addNewGoogleForumToList(list);
+}
 
-//Function used to add new items to the stack overflow list when they have been found
+//Function used to add new items to the google forums list when they have been found
 //If item is already in the list then it will ensure it is not duplicated
 //If the list changes size then the new list will be sent to the clients using socket.io
 function addNewStackOverflowToList(list) {
@@ -146,6 +155,46 @@ function addNewStackOverflowToList(list) {
   console.log("Stack Overflow List Length: " + discoveredArticles.stackoverflow.length);
 }
 
+function addNewGoogleForumToList(list) {
+  if(discoveredArticles.googleforums.length > 0) {
+    var googleList = discoveredArticles.googleforums;
+    var previousListLength = discoveredArticles.googleforums.length;
+    var numberSame = 0;
+    for (var i = 0; i<googleList.length; i++) {
+      var found = false;
+      var j = 0;
+      while ((found === false) && (j < list.length)) {
+        if (googleList[i].id == list[j].id) {
+          list.splice(j, 1);
+          numberSame++;
+          found = true;
+        }
+        j++;
+      }
+    }
+    googleList = googleList.concat(list);
+    console.log("previousListLength: " + previousListLength);
+    console.log("googleList: " + googleList.length);
+    discoveredArticles.googleforums = googleList;
+    //If new list is larger than previous list notify clients
+    if (googleList.length > previousListLength) {
+      //Send new list to clients
+      io.emit('articles', discoveredArticles);
+    }
+  } else {
+    discoveredArticles.googleforums = list;
+    io.emit('articles', discoveredArticles);
+  }
+  console.log("Google Forum List Length: " + discoveredArticles.googleforums.length);
+}
+
+
+
+
+
+
+
+
 //Settings Page Functions
 function addKeyword(keyword) {
   keyword = keyword.toLowerCase();
@@ -167,6 +216,17 @@ function deleteKeyword(index) {
   io.emit('keywordList', userKeywordList);
 }
 
+function addGoogleForum(feed) {
+  if (feed !== "" && feed !== null && !(googleForumFeeds.indexOf(feed) >= 0)) {
+    googleForumFeeds.push(feed);
+  }
+  io.emit('googleForumFeeds', googleForumFeeds);
+}
+
+function deleteGoogleForum(index) {
+  googleForumFeeds.splice(index, 1);
+  io.emit('googleForumFeeds', googleForumFeeds);
+}
 
 //Start refreshFeedFunction
-// startFeedCollection();
+startFeedCollection();

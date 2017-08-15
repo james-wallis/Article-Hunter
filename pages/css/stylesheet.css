@@ -319,6 +319,47 @@ main {
   margin: 5px;
 }
 
+.google-settings-page {
+  padding: 20px 0;
+}
+.google-settings-page h3 {
+  color: rgb(210, 212, 200);
+  font-size: 20px;
+}
+.google-settings h4 {
+  color: rgb(210, 212, 200);
+}
+.google-settings p {
+  padding-top: 10px;
+}
+.google-settings a {
+  font-size: 12px;
+  text-decoration: none;
+}
+.google-settings form {
+  display: block;
+}
+.google-settings input, .google-settings select {
+  display: block;
+  margin: 10px auto;
+  text-align: center;
+  padding: 2px 5px;
+}
+
+/* Keyword Selector at top of automated settings page */
+.keyword-select {
+  display: inline-block;
+  padding: 0 15px !important;
+  text-transform: capitalize;
+  border-right: 1px solid #868784;
+  color: rgb(210, 212, 200);
+  cursor: default;
+}
+
+.keyword-select:last-child {
+  border-right: none;
+}
+
 /* Keywords in Sidebar */
 #keyword-div {
   margin-top: 30px;

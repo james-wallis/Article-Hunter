@@ -10,10 +10,12 @@
  *                    or deleting a keyword.
  *    successColour:  The colour that text will be in a success message.
  *    errorColour:    The colour text will be in an error message.
+ *    googleFeeds:    The feeds that are being used for the google forums page.
  */
 var keywordList = [];
 var successColour = '#ACFFA1';
 var errorColour = '#FF6262';
+var googleFeeds;
 /**
  * Event Listeners
  * On Click:
@@ -38,6 +40,16 @@ document.getElementById('setting-icon-list-item').addEventListener('mouseleave',
  *
  */
 socket.on('keywordList', displayKeywords);
+socket.on('googleForumFeeds', function(list) {
+  googleFeeds = list;
+  var currentFeeds = document.getElementById('show-google-feed');
+  console.log(currentFeeds);
+  if (currentFeeds != null) {
+    showGoogleFeed();
+    console.log('not null');
+  }
+  console.log(list);
+});
 
 /**
  * Function to rotate the settings cog in the sidebar.
@@ -79,7 +91,7 @@ function displayKeywords(list) {
   var cont = document.getElementById('keyword-div');
   cont.textContent = '';
   var title = document.createElement('h3');
-  title.textContent = "Keywords";
+  title.textContent = "Current Keywords";
   cont.appendChild(title);
   for (var i = 0; i < list.length; i++) {
     var p = document.createElement('p');
@@ -115,6 +127,7 @@ function showSettings() {
   for (var i = 0; i < 2; i++) {
     var rowCont = document.createElement('div');
     rowCont.classList.add('col-12');
+    rowCont.style.borderBottom ='1px solid #333';
     for (var j = 0; j < 3; j++) {
       div = document.createElement('div');
       div.classList.add('col-4');
@@ -125,6 +138,35 @@ function showSettings() {
     }
     container.appendChild(rowCont);
   }
+
+  var googleDiv = document.createElement('div');
+  googleDiv.classList.add('col-12');
+  googleDiv.classList.add('google-settings-page');
+
+  var el = document.createElement('h3');
+  el.textContent = "Google Forums Specific";
+  googleDiv.appendChild(el);
+
+  el = document.createElement('div');
+  el.classList.add('col-4');
+  el.classList.add('google-settings');
+  el.id = 'show-google-feed';
+  googleDiv.appendChild(el);
+
+  el = document.createElement('div');
+  el.classList.add('col-4');
+  el.classList.add('google-settings');
+  el.id = 'add-google-feed';
+  googleDiv.appendChild(el);
+
+  el = document.createElement('div');
+  el.classList.add('col-4');
+  el.classList.add('google-settings');
+  el.id = 'remove-google-feed';
+  googleDiv.appendChild(el);
+
+  container.appendChild(googleDiv);
+
   populateSettings();
 }
 
@@ -138,6 +180,9 @@ function populateSettings() {
   changeSourcesForm();
   runTimesForm();
   amountToDisplayForm();
+  showGoogleFeed();
+  addGoogleFeed();
+  removeGoogleFeed();
 }
 
 /**
@@ -353,7 +398,7 @@ function runTimesForm() {
   var cont = document.getElementById('run-times');
   cont.innerHTML = "";
   var title = document.createElement('h3');
-  title.textContent = 'Run Times';
+  title.textContent = 'Run Frequency';
   cont.appendChild(title);
 }
 
@@ -416,6 +461,107 @@ function amountToDisplayForm() {
    var input = document.getElementById('edit-keyword-input');
    input.readOnly = false;
    input.value = select.value;
+ }
+
+ function showGoogleFeed(list = googleFeeds) {
+   console.log(list);
+   var cont = document.getElementById('show-google-feed');
+   cont.innerHTML = '';
+   var el = document.createElement('h4');
+   el.textContent = "Current Feeds";
+   cont.appendChild(el);
+   for (var i = 0; i < list.length; i++) {
+     var p = document.createElement('p');
+     p.textContent = list[i].title;
+     cont.append(p);
+
+     var a = document.createElement('a');
+     a.textContent = googleFeeds[i].source;
+     a.href = googleFeeds[i].source;
+     cont.append(a);
+   }
+ }
+
+ function addGoogleFeed() {
+   var cont = document.getElementById('add-google-feed');
+   var el = document.createElement('h4');
+   el.textContent = "Add Feed";
+   cont.appendChild(el);
+
+   //Create Form to submit a new Keyword
+   var form = document.createElement('form');
+   form.name = "add-google-feed";
+   form.id = "add-google-feed-form";
+   form.method = "POST";
+   form.action = "/#";
+
+   var inputTitle = document.createElement('input');
+   inputTitle.type = "text";
+   inputTitle.name = "google-form-title";
+   inputTitle.id = "add-google-feed-form-feed-title";
+   inputTitle.placeholder = "Enter Title";
+
+   var inputURL = document.createElement('input');
+   inputURL.type = "text";
+   inputURL.name = "google-form-url";
+   inputURL.id = "add-google-feed-form-feed-url";
+   inputURL.placeholder = "Enter URL";
+
+   var submit = document.createElement('input');
+   submit.type = "submit";
+   submit.name = "submit-add-google-feed";
+
+   var message = document.createElement('p');
+   message.id = 'add-google-form-message';
+   // form.appendChild(label);
+   form.appendChild(inputTitle);
+   form.appendChild(inputURL);
+   form.appendChild(submit);
+   cont.appendChild(form);
+   cont.appendChild(message);
+
+   //Stop form submit
+   document.getElementById('add-google-feed-form').addEventListener('submit', sendGoogleForums);
+ }
+
+ function removeGoogleFeed() {
+   var cont = document.getElementById('remove-google-feed');
+   var el = document.createElement('h4');
+   el.textContent = "Remove Feed";
+   cont.appendChild(el);
+
+   var form = document.createElement('form');
+   form.name = "delete-google-feed";
+   form.id = 'delete-google-feed-form';
+   form.method = "POST";
+   form.action = "/#";
+
+   var select = document.createElement('select');
+   select.name = "delete-google-feed";
+   select.id = "delete-google-feed-select";
+
+   var list  = googleFeeds;
+   var titleList = [];
+   for (var i = 0; i < list.length; i++) {
+     titleList.push(list[i].title);
+   }
+   selectKeywordOptions(titleList, 'delete', select);
+
+   var submit = document.createElement('input');
+   submit.type = "submit";
+   submit.value = "Delete Google Feed";
+   submit.name = "submit-delete-google-feed";
+
+   var message = document.createElement('p');
+   message.id = 'delete-google-feed-message';
+
+   form.appendChild(select);
+   form.appendChild(submit);
+   cont.appendChild(form);
+   cont.appendChild(message);
+
+   //Stop form submit
+   document.getElementById('delete-google-feed-form').addEventListener('submit', deleteGoogleForums);
  }
 
 //FUNCTIONS TO SEND FORMS TO SERVER
@@ -491,6 +637,63 @@ function deleteKeyword(e) {
     selectKeywordOptions(list, 'delete', select);
   } else {
     message.textContent = "Error: Choose a keyword to delete.";
+    message.style.color = errorColour;
+  }
+}
+
+function sendGoogleForums(e) {
+  var eventId = event.target.id;
+  event.preventDefault();
+  var newTitle = document.getElementById('add-google-feed-form-feed-title').value;
+  var newSource = document.getElementById('add-google-feed-form-feed-url').value;
+  var message = document.getElementById('add-google-form-message');
+  if (newSource != "" && newSource != null) {
+    // newSource = newSource.toLowerCase();
+    var list  = googleFeeds;
+    var sourceList = [];
+    for (var i = 0; i < list.length; i++) {
+      sourceList.push(list[i].source);
+    }
+    if (!(sourceList.indexOf(newSource) >= 0)) {
+      message.textContent = "Success! '" + newSource + "' added to the list of Google Forums.";
+      message.style.color = successColour;
+      var json = {'title': newTitle, 'source': newSource};
+      socket.emit('addGoogleForum', json);
+    } else if (sourceList.indexOf(newSource) >= 0) {
+      message.textContent = "Error: The forum is already in the list.";
+      message.style.color = errorColour;
+    } else {
+      message.textContent = "Error";
+      message.style.color = errorColour;
+      console.log(sourceList.indexOf(newSource) >= 0);
+      console.log(newSource);
+    }
+  } else {
+    message.textContent = "Error: input field is blank.";
+    message.style.color = errorColour;
+  }
+}
+
+function deleteGoogleForums(e) {
+  var eventId = event.target.id;
+  event.preventDefault();
+  var message = document.getElementById('delete-google-feed-message');
+  var index = document.getElementById('delete-google-feed-select').value;
+  if (Number.isInteger(parseInt(index))) {
+    message.textContent = "Success! The Google Feed has been removed from the list.";
+    message.style.color = successColour;
+    var list = googleFeeds;
+    var titleList = [];
+    var returnList = {};
+    for (var i = 0; i < list.length; i++) {
+      titleList.push(list[i].title);
+    }
+    titleList.splice(index, 1);
+    var select = document.getElementById('delete-google-feed-select');
+    socket.emit('deleteGoogleFeed', index);
+    selectKeywordOptions(titleList, 'delete', select);
+  } else {
+    message.textContent = "Error: Choose a Google Feed to delete.";
     message.style.color = errorColour;
   }
 }
